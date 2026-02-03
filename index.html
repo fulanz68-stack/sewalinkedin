@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collect Account By DpMyth</title>
+    
+    <!-- Proteksi -->
+    <script>
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && (e.key === 's' || e.key === 'u' || e.key === 'p' || e.key === 'a')) {
+            e.preventDefault();
+        }
+        if (e.key === 'F12') {
+            e.preventDefault();
+        }
+    });
+    </script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --linkedin-blue: #0077b5;
+            --linkedin-glow: #00a0dc;
+            --bg-dark: #000000;
+            --card-bg: rgba(20, 20, 20, 0.85);
+            --text-main: #ffffff;
+            --text-sub: #a0a0a0;
+            --input-bg: #1a1a1a;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-list: rgba(255, 255, 255, 0.03);
+            
+            --border-radius: 24px;
+            --error-red: #ff5252;
+            --success-green: #00e676;
+            --shadow-soft: 0 20px 50px -10px rgba(0, 119, 181, 0.15);
+            --unrestrict-orange: #ff9800;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Sora', sans-serif; 
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.5;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            
+            background: linear-gradient(135deg, #000000, #050f16, #000000, #08121a);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            width: 100%;
+            max-width: 480px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+            padding-bottom: 20px;
+            min-height: 600px;
+        }
+
+        .header { padding: 35px 24px 15px 24px; text-align: center; }
+        
+        .header h1 { 
+            font-size: 24px; font-weight: 700; color: white; 
+            letter-spacing: -0.02em; margin-bottom: 8px; text-transform: uppercase; 
+        }
+
+        .brand-Myth {
+            background: linear-gradient(90deg, var(--linkedin-blue), #00d2ff, var(--linkedin-blue));
+            background-size: 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            filter: drop-shadow(0 0 10px rgba(0, 119, 181, 0.5));
+            animation: textShine 3s linear infinite;
+        }
+        @keyframes textShine { to { background-position: 200% center; } }
+
+        .header p { font-size: 13px; color: var(--text-sub); margin-bottom: 15px; font-weight: 500; }
+        
+        .time-info-container { margin-bottom: 15px; animation: fadeIn 0.5s ease; }
+
+        .time-text-info {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+        .time-text-info.new { color: #00ff88; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+        .time-text-info.unrestrict { color: #ff9800; text-shadow: 0 0 10px rgba(255, 152, 0, 0.5); }
+        .time-text-info.closed { color: #ff5252; text-shadow: 0 0 10px rgba(255, 82, 82, 0.5); }
+
+        .clock-widget {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 6px 16px;
+            border-radius: 50px;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+        .clock-icon-svg { width: 14px; height: 14px; fill: #ccc; opacity: 0.9; }
+        .clock-text { font-size: 11px; font-weight: 600; color: #ccc; font-variant-numeric: tabular-nums; letter-spacing: 0.5px; }
+
+        .status-dot { 
+            width: 8px;
+            height: 8px;
+            border-radius: 50%; 
+            transition: all 0.3s; 
+            box-shadow: 0 0 8px currentColor;
+        }
+        .status-dot.new { 
+            background-color: #00ff88;
+            box-shadow: 0 0 12px #00ff88;
+            animation: pulseDot 1.5s infinite; 
+        }
+        .status-dot.closed { 
+            background-color: #ff5252;
+            box-shadow: 0 0 12px #ff5252;
+        }
+        .status-dot.unrestrict { 
+            background-color: #ff9800;
+            box-shadow: 0 0 12px #ff9800;
+            animation: pulseDot 1.5s infinite; 
+        }
+        @keyframes pulseDot { 
+            0% { transform: scale(0.9); opacity: 1; } 
+            50% { transform: scale(1.3); opacity: 0.8; }
+            100% { transform: scale(0.9); opacity: 1; } 
+        }
+
+        .separator { height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent); margin: 15px 0 25px 0; width: 100%; }
+
+        .promo-banner {
+            width: 100%; 
+            height: auto; 
+            border-radius: 16px; 
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
+            display: block; 
+            object-fit: cover;
+            opacity: 0; 
+            animation: fadeInBanner 0.8s ease forwards;
+            border: 1px solid rgba(255,255,255,0.1);
+            pointer-events: none;
+            -webkit-user-drag: none;
+            user-drag: none;
+        }
+        @keyframes fadeInBanner { to { opacity: 1; } }
+
+        .banner-protection {
+            position: relative;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .banner-protection::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 1;
+        }
+
+        .action-area { padding: 0 24px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 30px; }
+        
+        .btn {
+            width: 100%; padding: 16px; border: none; border-radius: 16px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            position: relative; overflow: hidden; z-index: 1; outline: none;
+            font-family: 'Sora', sans-serif; 
+        }
+        .btn:active { transform: scale(0.97) !important; }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--linkedin-blue), #005a8c); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(0, 119, 181, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            animation: pulseButtonBlue 2s infinite;
+        }
+        
+        .btn-secondary { 
+            background-color: transparent; color: white; 
+            border: 2px solid #ff9800;
+            transition: all 0.3s ease;
+            position: relative;
+            animation: pulseButtonOrange 2s infinite;
+        }
+        .btn-secondary::before { 
+            content: ""; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 0%; 
+            height: 100%; 
+            background-color: #ff9800; 
+            z-index: -1; 
+            transition: width 0.3s ease; 
+        }
+        .btn-secondary:hover { 
+            color: black; 
+            animation: none;
+        }
+        .btn-secondary:hover::before { 
+            width: 100%; 
+        }
+        
+        .btn.unrestrict-active { 
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            color: black;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+            animation: pulseButtonOrangeActive 1.5s infinite;
+        }
+        
+        .btn.closed-mode { 
+            filter: grayscale(1) brightness(0.5); 
+            opacity: 0.6; 
+            cursor: not-allowed; 
+            animation: none !important;
+        }
+        
+        @keyframes pulseButtonBlue {
+            0% { box-shadow: 0 4px 15px rgba(0, 119, 181, 0.4); transform: scale(1); }
+            50% { box-shadow: 0 4px 20px rgba(0, 119, 181, 0.6), 0 0 30px rgba(0, 119, 181, 0.4); transform: scale(1.02); }
+            100% { box-shadow: 0 4px 15px rgba(0, 119, 181, 0.4); transform: scale(1); }
+        }
+        
+        @keyframes pulseButtonOrange {
+            0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4); border-color: #ff9800; }
+            70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); border-color: #ffc107; }
+            100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); border-color: #ff9800; }
+        }
+        
+        @keyframes pulseButtonOrangeActive {
+            0% { box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4); transform: scale(1); }
+            50% { box-shadow: 0 4px 25px rgba(255, 152, 0, 0.6), 0 0 40px rgba(255, 152, 0, 0.3); transform: scale(1.03); }
+            100% { box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4); transform: scale(1); }
+        }
+        
+        .btn-primary:hover { animation: none; box-shadow: 0 6px 25px rgba(0, 119, 181, 0.5); transform: translateY(-2px); }
+        .btn.unrestrict-active:hover { animation: none; box-shadow: 0 6px 25px rgba(255, 152, 0, 0.5); transform: translateY(-2px); }
+
+        @keyframes shakeEffect { 
+            0% { transform: translateX(0); } 
+            25% { transform: translateX(-6px); } 
+            50% { transform: translateX(6px); } 
+            75% { transform: translateX(-6px); } 
+            100% { transform: translateX(0); } 
+        }
+        .btn-error-shake { 
+            animation: shakeEffect 0.4s ease-in-out; 
+            background: var(--error-red) !important; 
+            border-color: var(--error-red) !important; 
+            color: white !important; 
+            box-shadow: 0 0 20px rgba(255, 82, 82, 0.4) !important; 
+        }
+
+        .section { padding: 0 24px; margin-bottom: 24px; }
+        .section-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+        
+        .info-list { list-style: none; background: var(--accent-list); border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); }
+        
+        .info-list li { 
+            font-size: 13px; color: #ccc; margin-bottom: 10px; padding-left: 24px; 
+            position: relative; font-weight: 500; opacity: 0; 
+            transform: translateY(10px); animation: fadeInUp 0.5s ease forwards; 
+            transition: transform 0.2s ease, color 0.2s; 
+        }
+        .info-list li:nth-child(1) { animation-delay: 0.1s; }
+        .info-list li:nth-child(2) { animation-delay: 0.2s; }
+        .info-list li:hover { transform: translateX(5px); color: var(--linkedin-blue); }
+        .info-list li:last-child { margin-bottom: 0; }
+        
+        .info-list li::before { 
+            content: "✓"; color: #fff; font-weight: 800; font-size: 12px; 
+            position: absolute; left: 0; top: 1px; 
+            background: var(--linkedin-blue); width: 18px; height: 18px; 
+            display: flex; justify-content: center; align-items: center; border-radius: 50%;
+            box-shadow: 0 0 8px rgba(0, 119, 181, 0.6);
+        }
+        
+        .rate-list li span { font-weight: 700; color: #4db6ff; background: rgba(0, 119, 181, 0.15); padding: 2px 8px; border-radius: 6px; }
+
+        .special-rules { 
+            margin: 24px; 
+            background: linear-gradient(135deg, rgba(0, 119, 181, 0.05), rgba(0, 0, 0, 0.3)); 
+            border: 1px solid var(--linkedin-blue); 
+            border-radius: 16px; padding: 20px; position: relative; overflow: hidden; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); 
+        }
+        .special-rules::before { content: ""; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--linkedin-blue); box-shadow: 0 0 10px var(--linkedin-blue); }
+        .special-rules::after { content: ""; position: absolute; top: 0; left: -150%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transform: skewX(-25deg); animation: shimmerEffect 6s infinite; pointer-events: none; }
+        @keyframes shimmerEffect { 0% { left: -150%; } 20% { left: 150%; } 100% { left: 150%; } }
+        
+        .special-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 14px; text-transform: uppercase; display: block; position: relative; z-index: 1; letter-spacing: 0.5px; }
+        .special-list { list-style: none; position: relative; z-index: 1; }
+        .special-list li { font-size: 13px; font-weight: 500; color: #ccc; margin-bottom: 10px; display: flex; align-items: start; line-height: 1.4; opacity: 0; transform: translateY(10px); animation: fadeInUp 0.5s ease forwards; }
+        .special-list li:nth-child(1) { animation-delay: 0.4s; }
+        .special-list li:nth-child(2) { animation-delay: 0.5s; }
+        .special-list li:nth-child(3) { animation-delay: 0.6s; }
+        .special-list li svg { flex-shrink: 0; margin-right: 10px; margin-top: 2px; fill: var(--linkedin-blue); filter: drop-shadow(0 0 5px var(--linkedin-blue)); }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .footer { text-align: center; padding: 20px 24px 15px; font-size: 11px; color: #666; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; }
+        .footer span { font-weight: 700; color: var(--linkedin-blue); }
+
+        /* Form Overlay */
+        .form-overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #0d0d0d;
+            z-index: 100; padding: 24px; display: flex; flex-direction: column; 
+            transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            border-radius: 24px 24px 0 0; 
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            will-change: transform;
+        }
+        .form-overlay.active { 
+            transform: translateY(0); 
+            border-radius: 0; 
+            animation: slideInUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .form-overlay::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .form-overlay::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .form-overlay::-webkit-scrollbar-thumb {
+            background: var(--linkedin-blue);
+            border-radius: 10px;
+        }
+        
+        .form-overlay::-webkit-scrollbar-thumb:hover {
+            background: #005a8c;
+        }
+        
+        .form-header { 
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; 
+            position: sticky;
+            top: 0;
+            background: #0d0d0d;
+            padding-top: 10px;
+            padding-bottom: 15px;
+            z-index: 10;
+        }
+        .form-header h2 { font-size: 20px; font-weight: 700; color: white; display: flex; align-items: center; gap: 10px; }
+        
+        .linkedin-logo {
+            width: 24px;
+            height: 24px;
+            fill: var(--linkedin-blue);
+            filter: drop-shadow(0 0 5px var(--linkedin-blue));
+        }
+
+        .close-btn { 
+            width: 40px; height: 40px; border-radius: 50%; border: none; background: #1f1f1f; color: #999; font-size: 22px; 
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; 
+            flex-shrink: 0;
+        }
+        .close-btn:hover { background: #333; color: white; transform: rotate(90deg); }
+
+        .form-group { 
+            margin-bottom: 20px; transition: all 0.3s ease;
+            animation: fadeInForm 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.15s; }
+        .form-group:nth-child(3) { animation-delay: 0.2s; }
+        .form-group:nth-child(4) { animation-delay: 0.25s; }
+        .form-group:nth-child(5) { animation-delay: 0.3s; }
+        
+        @keyframes fadeInForm {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-group.hidden { display: none; }
+        .form-label { display: block; font-size: 12px; font-weight: 700; color: #ccc; margin-bottom: 8px; }
+        
+        .input-wrapper { position: relative; }
+        .input-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; fill: #666; transition: fill 0.2s; pointer-events: none; }
+        
+        .form-input { 
+            width: 100%; padding: 16px 16px 16px 48px; 
+            border: 1px solid #333; border-radius: 14px; 
+            font-size: 14px; font-family: 'Sora', sans-serif; font-weight: 500; 
+            outline: none; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+            color: white; background: var(--input-bg); 
+        }
+        .form-input:focus { border-color: var(--linkedin-blue); box-shadow: 0 0 0 2px rgba(0, 119, 181, 0.3); background: #252525; }
+        .form-input:focus + .input-icon, .form-input:not(:placeholder-shown) + .input-icon { fill: var(--linkedin-blue); }
+        
+        .code-badge { background-color: rgba(0, 119, 181, 0.15); border: 1px dashed var(--linkedin-blue); color: #4db6ff; font-weight: 700; text-align: center; letter-spacing: 2px; cursor: default; padding-left: 16px !important; }
+        
+        .warning-msg { color: var(--error-red); font-size: 12px; font-weight: 600; margin-top: 8px; display: none; padding-left: 4px; display: flex; align-items: center; gap: 5px; animation: fadeIn 0.3s ease; }
+        .warning-msg::before { content: "⚠"; font-size: 14px; }
+        .warning-msg.active { display: flex; }
+        .input-error { border-color: var(--error-red) !important; }
+
+        /* Confirmation Section - UKURAN LEBIH KECIL */
+        .confirmation-section {
+            margin-top: 25px;
+            padding: 16px;
+            background: rgba(0, 119, 181, 0.05);
+            border-radius: 14px;
+            border: 1px solid var(--linkedin-blue);
+            animation: fadeInUp 0.8s ease forwards;
+            animation-delay: 0.4s;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .confirmation-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 12px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .confirmation-text {
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        /* Template Container - UKURAN LEBIH KECIL */
+        .template-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 0;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Template Style - UKURAN LEBIH KECIL */
+        .template-text {
+            font-size: 12px;
+            color: #e0e0e0;
+            line-height: 1.5;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-family: 'Sora', sans-serif;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Template Content - UKURAN LEBIH KECIL */
+        .template-content {
+            width: 100%;
+            text-align: left;
+        }
+
+        .template-line {
+            margin-bottom: 6px;
+            display: block;
+            font-size: 11.5px;
+        }
+
+        .template-highlight {
+            color: #4db6ff;
+            font-weight: 600;
+        }
+
+        .template-note {
+            color: #ff9800;
+            font-size: 11px;
+            margin-top: 8px;
+            padding: 6px;
+            background: rgba(255, 152, 0, 0.1);
+            border-radius: 5px;
+            border-left: 2px solid #ff9800;
+            line-height: 1.3;
+        }
+
+        .copy-btn-template {
+            background: linear-gradient(135deg, var(--linkedin-blue), #005a8c);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 0 0 8px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            font-family: 'Sora', sans-serif;
+            width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .copy-btn-template:hover {
+            background: linear-gradient(135deg, #005a8c, var(--linkedin-blue));
+        }
+
+        .copy-btn-template:active {
+            transform: scale(0.98);
+        }
+
+        .copy-icon {
+            width: 14px;
+            height: 14px;
+        }
+
+        .bonus-badge {
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 11px;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Contoh Screenshot - UKURAN LEBIH KECIL */
+        .example-image {
+            width: 100%;
+            max-width: 180px;
+            margin: 12px auto;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            pointer-events: none;
+            animation: fadeIn 0.6s ease forwards;
+            animation-delay: 0.5s;
+            opacity: 0;
+        }
+
+        .example-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            pointer-events: none;
+        }
+
+        .admin-contact {
+            display: flex;
+            justify-content: center;
+            margin-top: 16px;
+            animation: fadeIn 0.6s ease forwards;
+            animation-delay: 0.6s;
+            opacity: 0;
+        }
+
+        .admin-btn {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-family: 'Sora', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            font-size: 13px;
+        }
+
+        .admin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        }
+
+        .admin-btn:active {
+            transform: scale(0.95);
+        }
+
+        .whatsapp-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Submit button */
+        #submit-btn {
+            animation: fadeInUp 0.6s ease forwards;
+            animation-delay: 0.35s;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* Modal Popup */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .modal-backdrop.show {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal-card {
+            background: #1a1a1a;
+            width: 85%;
+            max-width: 320px;
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .modal-backdrop.show .modal-card {
+            transform: scale(1);
+        }
+        
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 82, 82, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 15px;
+            color: #ff5252;
+        }
+        
+        .modal-icon svg {
+            width: 30px;
+            height: 30px;
+            fill: currentColor;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 8px;
+        }
+        
+        .modal-desc {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .modal-btn {
+            background: white;
+            color: black;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-family: 'Sora', sans-serif;
+            cursor: pointer;
+            width: 100%;
+            font-size: 14px;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .modal-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0, 119, 181, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            box-shadow: 0 8px 25px rgba(0, 119, 181, 0.4);
+            z-index: 2001;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            min-width: 220px;
+            text-align: center;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .toast-icon {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="main-view">
+            <!-- Header tetap sama -->
+            <div class="header">
+                <h1>Collect Account By <span class="brand-Myth">DpMyth</span></h1>
+                <p>Isi data dengan baik dan benar, serta pastikan sesuai kriteria</p>
+                
+                <div class="time-info-container">
+                    <div id="time-text-info" class="time-text-info new">NEW ACC - BUKA 24 JAM</div>
+                    <div class="clock-widget">
+                        <div id="status-dot" class="status-dot new"></div>
+                        <svg class="clock-icon-svg" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                        <span class="clock-text" id="time-display">24 JAM BUKA</span>
+                    </div>
+                </div>
+
+                <div class="separator"></div>
+            </div>
+
+            <!-- Action area tetap sama -->
+            <div class="action-area">
+                <div class="banner-protection">
+                    <img id="banner-image" src="banner2.gif" alt="Promo Banner" class="promo-banner">
+                </div>
+
+                <button id="btn-new" class="btn btn-primary" onclick="checkTimeAndOpen('new', this)">New Acc</button>
+                <button id="btn-unrestric" class="btn btn-secondary" onclick="checkTimeAndOpen('unrestric', this)">Unrestric</button>
+            </div>
+
+            <!-- Sections tetap sama -->
+            <div class="section">
+                <div class="section-title">Kriteria</div>
+                <ul class="info-list">
+                    <li>Pembuatan Min Desember 2024</li>
+                    <li>Koneksi min 30+</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Rate Sewa?</div>
+                <ul class="info-list rate-list">
+                    <li><span>New Acc Rp 190.000 </span> — restric tetap Full Payment.</li>
+                    <li><span>Unrestrict Rp 270.000</span></li>
+                    <li><span>Fee Reff = Rp 32.000</span> - per orang</li>
+                </ul>
+            </div>
+
+            <div class="special-rules">
+                <span class="special-title">★ Spesial Rules DpMyth</span>
+                <ul class="special-list">
+                    <li><svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>Wajib Join Grup Utama</li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>New Acc Restric, full payment</li>
+                    <li><svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>Country Indonesia 🇮🇩</li>
+                    <li>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512">
+                            <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24v264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/>
+                        </svg>
+                        Bisa 1 Wallet hanya untuk  Refferer 🏆<br>
+                        (Membawa 5 reff)
+                    </li>
+                </ul>
+            </div>
+
+            <div class="footer">&copy; 2024 Collect Account By <span>8800</span>. All rights reserved.</div>
+        </div>
+
+        <!-- Form Overlay -->
+        <div id="form-overlay" class="form-overlay">
+            <div class="form-header">
+                <h2 id="form-title">
+                    <svg class="linkedin-logo" viewBox="0 0 24 24">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                    <span id="form-title-text">Linkedln</span>
+                </h2>
+                <button class="close-btn" onclick="closeForm()">&times;</button>
+            </div>
+
+            <form id="rentalForm">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" class="form-input" placeholder="Masukkan email akun" required>
+                        <svg class="input-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="password" class="form-input" placeholder="Masukkan password" required>
+                        <svg class="input-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+                    </div>
+                </div>
+
+                <div class="form-group" id="group-koneksi">
+                    <label class="form-label">Koneksi</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="connections" class="form-input" placeholder="Min 30" oninput="checkConnection()">
+                        <svg class="input-icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    </div>
+                    <div id="conn-warning" class="warning-msg">Gb dulu Bosku min 30 koneksi</div>
+                </div>
+
+                <div class="form-group" id="group-tahun">
+                    <label class="form-label">Tahun Akun</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="year" class="form-input" placeholder="Contoh: 2024">
+                        <svg class="input-icon" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Kode Unik</label>
+                    <div class="input-wrapper">
+                         <input type="text" id="code" class="form-input code-badge" value="8800" readonly>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <button type="button" id="submit-btn" class="btn btn-primary">Mulai Sewa</button>
+                </div>
+            </form>
+
+            <!-- Bagian Konfirmasi - UKURAN LEBIH KECIL -->
+            <div class="confirmation-section">
+                <div class="confirmation-title">
+                    Konfirmasi Ke Admin
+                    <span id="bonus-badge" class="bonus-badge" style="display: none;">Bonus $5</span>
+                </div>
+                <div class="confirmation-text">
+                    Setelah akun berhasil disetor ke client, konfirmasi ke admin:
+                </div>
+                
+                <!-- Template Container - UKURAN LEBIH KECIL -->
+                <div class="template-container">
+                    <!-- Template New Account - RINGKAS -->
+                    <div id="template-new" class="template-text" style="display: none;">
+<span class="template-content">
+<span class="template-line">berhasil setor Account dan successful.</span>
+<span class="template-line">Email: (Linkedln)</span>
+<span class="template-line">Week : (Check Group Utama) </span>
+<span class="template-line">Screenshot: (percakapan dngn Client)</span>
+
+<span class="template-note">Code Referral : Opstional</span>
+</span>
+                    </div>
+                    
+                    <!-- Template Unrestrict - RINGKAS -->
+                    <div id="template-unrestric" class="template-text" style="display: none;">
+<span class="template-content">
+<span class="template-line">berhasil setor UNRESTRICT dan bonus $5.</span>
+<span class="template-line">Email: "Linkedln saya"</span>
+<span class="template-line">Week : "cek Grup Utama"</span>
+<span class="template-line">Screenshot: "percakapan dngn Client"</span>
+
+<span class="template-note">⚠️</span>
+</span>
+                    </div>
+                    
+                    <button class="copy-btn-template" onclick="copyTemplate()">
+                        <svg class="copy-icon" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                        </svg>
+                        Salin Template
+                    </button>
+                </div>
+                
+                <!-- Contoh Screenshot - UKURAN LEBIH KECIL -->
+                <div class="example-image">
+                    <img src="contoh.png" alt="Contoh Screenshot Konfirmasi">
+                </div>
+                
+                <div class="confirmation-text">
+                    <strong>Penting:</strong> Email terlihat jelas, password disensor!
+                </div>
+                
+                <div class="admin-contact">
+                    <button class="admin-btn" onclick="contactAdmin()">
+                        <svg class="whatsapp-icon" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M16.75 13.96c.25.13.41.2.46.3.06.11.04.61-.21 1.18-.2.56-1.24 1.1-1.7 1.12-.46.02-.47.36-2.96-.73-2.49-1.09-3.99３.75-4.11-3.92-.12-.17-.96-1.38-.92-2.61.05-1.22.69-1.8.95-2.04.24-.26.51-.29.68-.26h.47c.15 0 .36-.06.55.45l.69 1.87c.06.13.1.28.01.44l-.27.41-.39.42c-.12.12-.26.25-.12.5.12.26.62 1.09 1.32 1.78.91.88 1.71 1.17 1.95 1.3.24.14.39.12.54-.04l.81-.94c.19-.25.35-.19.58-.11l1.67.88M12 2a10 10 0 0 1 10 10 a10 10 0 0 1-10 10c-1.97 0-3.8-.57-5.35-1.55L2 22l1.55-4.65A9.969 9.969 0 0 1 2 12 10 10 0 0 1 12 2m0 2a8 8 0 0 0-8 8c0 1.72.54 3.31 1.46 4.61L4.5 19.5l2.89-.96A7.95 7.95 0 0 0 12 20a8 8 0 0 0 8-8 8 8 0 0 0-8-8z"/>
+                        </svg>
+                        Hubungi Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal dan Toast tetap sama -->
+        <div id="closed-modal" class="modal-backdrop" onclick="closeModalOutside(event)">
+            <div class="modal-card">
+                <div class="modal-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M11.01 21.99C5.44 21.39 1.39 17.34.8 11.77.21 6.2 4.86 1.55 10.41 2c.55.05.95.54.89 1.08-.28 2.48.76 4.97 2.75 6.59 2.26 1.84 5.36 1.84 7.62 0 .47-.38 1.16-.12 1.27.48.57 3.26-1.02 6.61-3.96 8.35-2.07 1.23-4.45 1.62-6.76 1.49h-.21z"/>
+                    </svg>
+                </div>
+                <h3 class="modal-title" id="modal-title">Sewa Tutup!</h3>
+                <p class="modal-desc" id="modal-desc">Buka jam sesuai jadwal.</p>
+                <button class="modal-btn" onclick="closeModal()">Oke, Mengerti</button>
+            </div>
+        </div>
+
+        <div id="toast" class="toast">
+            <svg class="toast-icon" viewBox="0 0 24 24">
+                <path d="M11.01 21.99C5.44 21.39 1.39 17.34.8 11.77.21 6.2 4.86 1.55 10.41 2c.55.05.95.54.89 1.08-.28 2.48.76 4.97 2.75 6.59 2.26 1.84 5.36 1.84 7.62 0 .47-.38 1.16-.12 1.27.48.57 3.26-1.02 6.61-3.96 8.35-2.07 1.23-4.45 1.62-6.76 1.49h-.21z"/>
+            </svg>
+            <span id="toast-text">Toast message</span>
+        </div>
+    </div>
+
+    <script>
+        // ========== PERUBAHAN UTAMA ==========
+        // Template dibuat lebih kecil dan ringkas
+        
+        // 1. FUNGSI TOAST
+        function showToast(message) {
+            console.log('🔔 Menampilkan toast:', message);
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toast-text');
+            
+            toastText.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // 2. FUNGSI MODAL
+        function showModal(title, description) {
+            console.log('📱 Menampilkan modal:', title);
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-desc').textContent = description;
+            document.getElementById('closed-modal').classList.add('show');
+        }
+
+        // 3. FUNGSI TUTUP MODAL
+        function closeModal() {
+            document.getElementById('closed-modal').classList.remove('show');
+        }
+
+        function closeModalOutside(event) {
+            if (event.target.id === 'closed-modal') {
+                closeModal();
+            }
+        }
+
+        // 4. FUNGSI UTAMA KLIK TOMBOL - NEW ACC 24 JAM
+        function checkTimeAndOpen(type, btnElement) {
+            console.log(`🎯 Tombol ${type} diklik!`);
+            
+            const period = checkCurrentPeriod();
+            
+            // NEW ACC SEKARANG 24 JAM - SELALU BUKA
+            if (type === 'new') {
+                console.log('✅ New Acc 24 jam! Membuka form...');
+                openForm(type);
+            } 
+            // UNRESTRICT tetap sesuai jadwal
+            else if (type === 'unrestric') {
+                if (period === 'unrestric') {
+                    console.log('✅ Jadwal Unrestrict buka! Membuka form...');
+                    openForm(type);
+                } else {
+                    console.log('❌ Jadwal Unrestrict tutup! Menampilkan notifikasi...');
+                    
+                    // Animasi shake tombol
+                    btnElement.classList.add('btn-error-shake');
+                    setTimeout(() => {
+                        btnElement.classList.remove('btn-error-shake');
+                    }, 400);
+                    
+                    // Tampilkan notifikasi
+                    showModal('Unrestric Tutup!', 'Buka jam 05:00 - 09:00 WIB');
+                    showToast('Unrestric Tutup! Buka jam 05:00 - 09:00 WIB');
+                }
+            }
+        }
+
+        // 5. FUNGSI UNTUK PRODUKSI - NEW ACC 24 JAM
+        function getWIBTime() {
+            const now = new Date();
+            return new Date(now.getTime() + (7 * 60 * 60 * 1000));
+        }
+
+        function checkCurrentPeriod() {
+            const wibTime = getWIBTime();
+            const hour = wibTime.getUTCHours();
+            console.log(`⏰ Jam WIB saat ini: ${hour}:00`);
+            
+            // UNRESTRICT hanya jam 05:00 - 09:00
+            if (hour >= 5 && hour < 9) {
+                console.log('📅 Periode: UNRESTRICT (05:00 - 09:00)');
+                return 'unrestric';
+            } else {
+                console.log('📅 Periode: UNRESTRICT TUTUP, NEW ACC 24 JAM');
+                return 'closed'; // Hanya untuk Unrestrict
+            }
+        }
+
+        // 6. FUNGSI UPDATE BANNER
+        function updateBannerBySchedule() {
+            const bannerImage = document.getElementById('banner-image');
+            bannerImage.src = 'banner2.gif';
+            console.log('🖼️ Menampilkan banner2.gif (New Acc 24 jam aktif)');
+        }
+
+        // 7. FUNGSI FORM DENGAN SMOOTH SCROLLING
+        let currentFormType = 'new';
+
+        function openForm(type) {
+            const overlay = document.getElementById("form-overlay");
+            const titleText = document.getElementById("form-title-text");
+            const groupKoneksi = document.getElementById("group-koneksi");
+            const groupTahun = document.getElementById("group-tahun");
+            const templateNew = document.getElementById("template-new");
+            const templateUnrestric = document.getElementById("template-unrestric");
+            const bonusBadge = document.getElementById("bonus-badge");
+            
+            currentFormType = type;
+            
+            if (type === 'new') {
+                titleText.innerText = "Linkedln - New Account";
+                groupKoneksi.classList.remove("hidden");
+                groupTahun.classList.remove("hidden");
+                templateNew.style.display = "flex";
+                templateUnrestric.style.display = "none";
+                bonusBadge.style.display = "none";
+            } else {
+                titleText.innerText = "Linkedln - Unrestrict";
+                groupKoneksi.classList.add("hidden");
+                groupTahun.classList.add("hidden");
+                templateNew.style.display = "none";
+                templateUnrestric.style.display = "flex";
+                bonusBadge.style.display = "inline-block";
+            }
+            
+            // Buka form dengan smooth animation
+            overlay.classList.add("active");
+            
+            // Reset scroll ke atas dengan smooth animation
+            setTimeout(() => {
+                overlay.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+                
+                // Fokus ke input pertama setelah form terbuka
+                setTimeout(() => {
+                    document.getElementById('email').focus();
+                }, 300);
+            }, 100);
+        }
+
+        function closeForm() { 
+            const overlay = document.getElementById("form-overlay");
+            overlay.style.transition = "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+            overlay.classList.remove("active");
+            
+            setTimeout(() => {
+                overlay.style.transition = "";
+            }, 400);
+        }
+
+        function checkConnection() {
+            const input = document.getElementById("connections");
+            const warning = document.getElementById("conn-warning");
+            const value = parseInt(input.value);
+            
+            if (currentFormType === 'new' && input.value !== "" && value < 30) {
+                warning.classList.add("active");
+                input.classList.add("input-error");
+                return false;
+            } else {
+                warning.classList.remove("active");
+                input.classList.remove("input-error");
+                return true;
+            }
+        }
+
+        // 8. FUNGSI COPY TEMPLATE - TEMPLATE LEBIH RINGKAS
+        function copyTemplate() {
+            let templateText = '';
+            
+            // Template yang lebih ringkas
+            if (currentFormType === 'new') {
+                templateText = `*berhasil setor Account & successful*✅\n\nEmail: (Linkedln)\nWeek : (cek Grup Utama) \nScreenshot: (percakapan dngn Client) \n\n⚠️ Code Referral : Optional`;
+            } else {
+                templateText = `berhasil setor UNRESTRICT dan bonus $5.\n\nEmail: (Linkedln)\n Week : (Cek Grup Utama) \nScreenshot: (percakapan dngn Client)\n\n⚠️ email terlihat! Password wajib Sensor!`;
+            }
+            
+            // Menggunakan Clipboard API
+            navigator.clipboard.writeText(templateText).then(function() {
+                showToast("✅ Template disalin!");
+                
+                // Animasi tombol copy
+                const copyBtn = document.querySelector('.copy-btn-template');
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<svg class="copy-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Berhasil Disalin';
+                copyBtn.style.background = 'linear-gradient(135deg, #00e676, #00c853)';
+                
+                // Reset tombol setelah 2 detik
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.style.background = 'linear-gradient(135deg, var(--linkedin-blue), #005a8c)';
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Gagal menyalin:', err);
+                
+                // Fallback untuk browser lama
+                const textArea = document.createElement('textarea');
+                textArea.value = templateText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                showToast("✅ Template disalin!");
+            });
+        }
+
+        function contactAdmin() {
+            const phoneNumber = "6285797862151";
+            let message = currentFormType === 'new' 
+                ? "Halo admin, saya ingin konfirmasi setor akun LinkedIn New Account."
+                : "Halo admin, saya ingin konfirmasi setor akun LinkedIn Unrestrict dan bonus $5.";
+            
+            const waUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            window.open(waUrl, '_blank');
+        }
+
+        // 9. FUNGSI PROCESS SEND
+        function processSend() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const connections = document.getElementById('connections').value;
+            const year = document.getElementById('year').value;
+            const code = document.getElementById('code').value;
+            
+            let message = currentFormType === 'new' 
+                ? `*New Account Rent Request : Group DpMyth*\n\n📧 Email: ${email}\n🔑 Password: ${password}\n🔗 Connections: ${connections}\n📅 Account Year: ${year}\n🔢 Code: ${code}\n\n Thanks boss!`
+                : `*Unrestrict Account Rent Request : Fads*\n\n📧 Email: ${email}\n🔑 Password: ${password}\n🔢 Code: ${code}\n\nTerima kasih!`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            const phoneNumber = "12138496837";
+            const waUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+            window.open(waUrl, '_blank');
+            
+            showToast("✅ Form berhasil dikirim!");
+            document.getElementById("rentalForm").reset();
+            closeForm();
+        }
+
+        // 10. EVENT LISTENERS
+        document.getElementById("submit-btn").addEventListener("click", function(e) {
+            const form = document.getElementById("rentalForm");
+            const btn = this;
+            
+            if (!checkConnection() || !form.checkValidity()) {
+                form.reportValidity();
+                btn.classList.add("btn-error-shake");
+                setTimeout(() => { btn.classList.remove("btn-error-shake"); }, 400);
+            } else {
+                processSend();
+            }
+        });
+
+        // 11. INISIALISASI - NEW ACC 24 JAM
+        window.onload = function() {
+            console.log('✅ Halaman siap! New Acc 24 jam aktif.');
+            
+            // Update status UI untuk NEW ACC 24 JAM
+            const period = checkCurrentPeriod();
+            const timeText = document.getElementById('time-text-info');
+            const statusDot = document.getElementById('status-dot');
+            const btnNew = document.getElementById('btn-new');
+            const btnUnrestric = document.getElementById('btn-unrestric');
+            const timeDisplay = document.getElementById('time-display');
+            
+            // NEW ACC 24 JAM - SELALU AKTIF
+            timeText.className = 'time-text-info new';
+            statusDot.className = 'status-dot new';
+            timeText.textContent = 'NEW ACC - BUKA 24 JAM';
+            timeDisplay.textContent = '24 JAM BUKA';
+            btnNew.classList.remove('closed-mode');
+            
+            // Unrestrict sesuai jadwal
+            if (period === 'unrestric') {
+                timeText.textContent = 'UNRESTRICT - BUKA';
+                timeDisplay.textContent = '05:00 - 09:00 WIB';
+                btnUnrestric.classList.remove('closed-mode');
+                btnUnrestric.classList.add('unrestrict-active');
+                console.log('✅ Tombol Unrestrict aktif (05:00-09:00)');
+            } else {
+                btnUnrestric.classList.add('closed-mode');
+                console.log('⏸️ Tombol Unrestrict dinonaktifkan');
+            }
+            
+            // Update banner
+            updateBannerBySchedule();
+            
+            // Proteksi gambar
+            document.querySelectorAll('img').forEach(img => {
+                img.setAttribute('draggable', 'false');
+                img.style.pointerEvents = 'none';
+            });
+        };
+
+        // 12. AUTO REFRESH SETIAP 1 MENIT
+        setInterval(function() {
+            const period = checkCurrentPeriod();
+            
+            // Update tampilan tombol Unrestrict jika perlu
+            const btnUnrestric = document.getElementById('btn-unrestric');
+            
+            if (period === 'unrestric') {
+                btnUnrestric.classList.remove('closed-mode');
+                btnUnrestric.classList.add('unrestrict-active');
+            } else {
+                btnUnrestric.classList.add('closed-mode');
+                btnUnrestric.classList.remove('unrestrict-active');
+            }
+        }, 60000); // Refresh setiap 1 menit
+
+    </script>
+
+</body>
+</html>
